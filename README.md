@@ -3,8 +3,11 @@
 > Multilingual, voice-first AI platform that aligns citizen infrastructure demand with government capital — from a Hindi voice note on Telegram to a ₹8 Cr sanction letter, in one closed loop.
 
 **Live app:** https://jansetu-ai-afa77.web.app
+
 **Live API:** https://jansetu-backend-klv2alsjfa-el.a.run.app
+
 **API docs (Swagger):** https://jansetu-backend-klv2alsjfa-el.a.run.app/api/docs/
+
 **Citizen bot:** [@jansetu_ai_bot](https://t.me/jansetu_ai_bot) on Telegram
 
 ---
