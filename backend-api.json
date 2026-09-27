@@ -1,0 +1,1162 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "JanSetu AI — DPG API",
+    "version": "0.6.0",
+    "description": "Digital Public Good API for multilingual citizen infrastructure requests, priority-index driven policymaker planning, and closed-loop nudge dispatch. Auth via Firebase ID token in `Authorization: Bearer \u003Ctoken\u003E`. Some endpoints require the `policymaker` role (email must be listed in `POLICYMAKER_EMAILS` on the server).",
+    "contact": {
+      "name": "JanSetu AI",
+      "url": "https://github.com/"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local dev"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Firebase Auth session"
+    },
+    {
+      "name": "Requests",
+      "description": "Citizen infrastructure requests"
+    },
+    {
+      "name": "Districts",
+      "description": "District metrics & priority index"
+    },
+    {
+      "name": "Schemes",
+      "description": "Government schemes catalog"
+    },
+    {
+      "name": "Projects",
+      "description": "AI-recommended infra projects (policymaker writes)"
+    },
+    {
+      "name": "Nudges",
+      "description": "Citizen status alerts (Telegram / WhatsApp / SMS)"
+    },
+    {
+      "name": "AI",
+      "description": "Gemini-backed vision, ASR, TTS, translate, copilot"
+    },
+    {
+      "name": "Priority",
+      "description": "Priority-index recompute & simulate"
+    },
+    {
+      "name": "Verification",
+      "description": "Satellite audit post-sanction"
+    },
+    {
+      "name": "Multichannel",
+      "description": "External webhooks (Telegram, WhatsApp, SMS, IVR)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "firebaseAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Firebase ID Token",
+        "description": "Sign in on the frontend, then paste the Firebase ID token here. Get one with `firebase.auth().currentUser.getIdToken()` in the browser console."
+      }
+    },
+    "schemas": {
+      "CitizenRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "req_001"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "whatsapp",
+              "ivr",
+              "sms",
+              "webapp",
+              "ussd",
+              "telegram"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "example": "hi"
+          },
+          "citizenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "tg:8863390281"
+          },
+          "text": {
+            "type": "string"
+          },
+          "voiceTranscript": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "rural_roads",
+              "clean_water",
+              "healthcare",
+              "school_upgrades",
+              "power_grid",
+              "sanitation_drainage"
+            ]
+          },
+          "district": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "pincode": {
+            "type": "string",
+            "nullable": true
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "landmark": {
+            "type": "string",
+            "nullable": true
+          },
+          "affectedPeople": {
+            "type": "integer"
+          },
+          "urgencyScore": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ai_verified",
+              "in_review",
+              "sanctioned"
+            ]
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "h3HexId": {
+            "type": "string"
+          },
+          "matchedScheme": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "DistrictMetric": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "districtName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "population": {
+            "type": "integer"
+          },
+          "citizenDemandCount": {
+            "type": "integer"
+          },
+          "waterDeficitIndex": {
+            "type": "number"
+          },
+          "roadConnectivityDeficit": {
+            "type": "number"
+          },
+          "healthcareDeficit": {
+            "type": "number"
+          },
+          "unspentFundsCr": {
+            "type": "number"
+          },
+          "priorityIndex": {
+            "type": "number"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "h3HexCoordinates": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        }
+      },
+      "RecommendedProject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "affectedVillages": {
+            "type": "integer"
+          },
+          "affectedPopulation": {
+            "type": "integer"
+          },
+          "estimatedBudgetCr": {
+            "type": "number"
+          },
+          "matchedScheme": {
+            "type": "string"
+          },
+          "matchedSchemeAcronym": {
+            "type": "string"
+          },
+          "justification": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "recommended",
+              "sanctioned"
+            ]
+          }
+        }
+      },
+      "NudgeAlert": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "citizenPhone": {
+            "type": "string",
+            "example": "tg:8863390281"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "whatsapp",
+              "sms",
+              "telegram"
+            ]
+          },
+          "statusText": {
+            "type": "string"
+          },
+          "sentTimestamp": {
+            "type": "string"
+          },
+          "read": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "UNAUTHENTICATED"
+              },
+              "message": {
+                "type": "string",
+                "example": "Authentication required"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "firebaseAuth": []
+    }
+  ],
+  "paths": {
+    "/api/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Return the signed-in user + resolved role",
+        "security": [
+          {
+            "firebaseAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed-in identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uid": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "citizen",
+                        "policymaker"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/requests": {
+      "get": {
+        "tags": [
+          "Requests"
+        ],
+        "summary": "List citizen requests",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requests": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CitizenRequest"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Requests"
+        ],
+        "summary": "Submit a new citizen request (from web app)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text",
+                  "district",
+                  "state",
+                  "category"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "citizenName": {
+                    "type": "string"
+                  },
+                  "district": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "affectedPeople": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "request": {
+                      "$ref": "#/components/schemas/CitizenRequest"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/districts": {
+      "get": {
+        "tags": [
+          "Districts"
+        ],
+        "summary": "List all districts with priority indices",
+        "responses": {
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "districts": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DistrictMetric"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/districts/{id}": {
+      "get": {
+        "tags": [
+          "Districts"
+        ],
+        "summary": "Get one district",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "District",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "district": {
+                      "$ref": "#/components/schemas/DistrictMetric"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/schemes": {
+      "get": {
+        "tags": [
+          "Schemes"
+        ],
+        "summary": "List government schemes",
+        "responses": {
+          "200": {
+            "description": "List"
+          }
+        }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "List all recommended / sanctioned projects",
+        "responses": {
+          "200": {
+            "description": "List",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "projects": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RecommendedProject"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Persist an AI-generated project (policymaker only)",
+        "security": [
+          {
+            "firebaseAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendedProject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Not a policymaker"
+          }
+        }
+      }
+    },
+    "/api/projects/recommend": {
+      "post": {
+        "tags": [
+          "Projects",
+          "AI"
+        ],
+        "summary": "Generate top-N AI project recommendations from current priority index",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "weights": {
+                    "type": "object",
+                    "properties": {
+                      "demandVolume": {
+                        "type": "number"
+                      },
+                      "infraDeficit": {
+                        "type": "number"
+                      },
+                      "vulnerability": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "category": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "topN": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "useGemini": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked list"
+          }
+        }
+      }
+    },
+    "/api/projects/{id}/sanction": {
+      "post": {
+        "tags": [
+          "Projects"
+        ],
+        "summary": "Sanction a project and fan out Telegram/WhatsApp nudges to linked citizens (policymaker only)",
+        "security": [
+          {
+            "firebaseAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sanctioned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/RecommendedProject"
+                    },
+                    "nudgeCount": {
+                      "type": "integer"
+                    },
+                    "nudges": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/NudgeAlert"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Not a policymaker"
+          }
+        }
+      }
+    },
+    "/api/nudges": {
+      "get": {
+        "tags": [
+          "Nudges"
+        ],
+        "summary": "List all dispatched nudges",
+        "responses": {
+          "200": {
+            "description": "List"
+          }
+        }
+      }
+    },
+    "/api/nudges/send": {
+      "post": {
+        "tags": [
+          "Nudges"
+        ],
+        "summary": "Send a nudge for a specific request (policymaker only)",
+        "security": [
+          {
+            "firebaseAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "requestId",
+                  "statusText"
+                ],
+                "properties": {
+                  "requestId": {
+                    "type": "string"
+                  },
+                  "statusText": {
+                    "type": "string",
+                    "maxLength": 1600
+                  },
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "whatsapp",
+                      "sms",
+                      "telegram"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispatched or logged with failure reason"
+          },
+          "401": {
+            "description": "Unauthenticated"
+          },
+          "403": {
+            "description": "Not a policymaker"
+          }
+        }
+      }
+    },
+    "/api/telegram/send": {
+      "post": {
+        "tags": [
+          "Nudges",
+          "Multichannel"
+        ],
+        "summary": "Ad-hoc Telegram DM (policymaker only) — no request lookup, uses chat_id directly",
+        "security": [
+          {
+            "firebaseAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "chatId",
+                  "text"
+                ],
+                "properties": {
+                  "chatId": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ],
+                    "example": "8863390281"
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 4096
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Dispatch attempt (see `dispatched` + `reason`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "nudge": {
+                      "$ref": "#/components/schemas/NudgeAlert"
+                    },
+                    "dispatched": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/telegram/webhook": {
+      "post": {
+        "tags": [
+          "Multichannel"
+        ],
+        "summary": "Telegram Bot webhook — receives citizen messages",
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ack"
+          }
+        }
+      }
+    },
+    "/api/whatsapp/webhook": {
+      "post": {
+        "tags": [
+          "Multichannel"
+        ],
+        "summary": "Twilio WhatsApp webhook",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Ack"
+          }
+        }
+      }
+    },
+    "/api/sms/webhook": {
+      "post": {
+        "tags": [
+          "Multichannel"
+        ],
+        "summary": "Twilio SMS webhook",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Ack"
+          }
+        }
+      }
+    },
+    "/api/ivr/webhook": {
+      "post": {
+        "tags": [
+          "Multichannel"
+        ],
+        "summary": "Twilio IVR (voice) webhook",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "TwiML response"
+          }
+        }
+      }
+    },
+    "/api/vision/analyze-photo": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Gemini multimodal analysis of a citizen photo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "imageBase64",
+                  "mimeType"
+                ],
+                "properties": {
+                  "imageBase64": {
+                    "type": "string"
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "example": "image/jpeg"
+                  },
+                  "hint": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deficit + severity + estimated cost"
+          }
+        }
+      }
+    },
+    "/api/copilot/query": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Ask the Policy Copilot a natural-language question over districts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "question",
+                  "districtIds"
+                ],
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "districtIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Markdown answer"
+          }
+        }
+      }
+    },
+    "/api/translate": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Translate any Indian-language text to English",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "sourceLang": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "English translation + detected source"
+          }
+        }
+      }
+    },
+    "/api/asr": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Speech-to-text (Gemini multimodal)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "audioBase64",
+                  "mimeType"
+                ],
+                "properties": {
+                  "audioBase64": {
+                    "type": "string"
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "example": "audio/ogg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transcript + detected language + English translation"
+          }
+        }
+      }
+    },
+    "/api/tts/synthesize": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "summary": "Text-to-speech (Gemini preview TTS)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "voice": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Base64 audio"
+          }
+        }
+      }
+    },
+    "/api/priority/simulate": {
+      "post": {
+        "tags": [
+          "Priority"
+        ],
+        "summary": "Re-rank districts using custom weights (no DB write)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "weights": {
+                    "type": "object",
+                    "properties": {
+                      "demandVolume": {
+                        "type": "number"
+                      },
+                      "infraDeficit": {
+                        "type": "number"
+                      },
+                      "vulnerability": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "category": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranked list"
+          }
+        }
+      }
+    },
+    "/api/verification/projects/{id}/satellite-audit": {
+      "get": {
+        "tags": [
+          "Verification"
+        ],
+        "summary": "Pre/post satellite imagery for a sanctioned project",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit payload"
+          }
+        }
+      }
+    }
+  }
+}

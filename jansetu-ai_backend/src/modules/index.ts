@@ -1,0 +1,38 @@
+import { Router } from 'express';
+import { asrRouter } from './asr/router';
+import { copilotRouter } from './copilot/router';
+import { districtsRouter } from './districts/router';
+import { ivrRouter } from './ivr/router';
+import { meRouter } from './me/router';
+import { nudgesRouter } from './nudges/router';
+import { priorityRouter } from './priority/router';
+import { projectsRouter } from './projects/router';
+import { requestsRouter } from './requests/router';
+import { schemesRouter } from './schemes/router';
+import { smsRouter } from './sms/router';
+import { telegramRouter } from './telegram/router';
+import { translationRouter } from './translation/router';
+import { ttsRouter } from './tts/router';
+import { verificationRouter } from './verification/router';
+import { visionRouter } from './vision/router';
+import { whatsappRouter } from './whatsapp/router';
+
+export const apiRouter = Router();
+
+apiRouter.use('/me', meRouter);
+apiRouter.use('/requests', requestsRouter);
+apiRouter.use('/districts', districtsRouter);
+apiRouter.use('/schemes', schemesRouter);
+apiRouter.use('/projects', projectsRouter);
+apiRouter.use('/nudges', nudgesRouter);
+apiRouter.use('/vision', visionRouter);
+apiRouter.use('/copilot', copilotRouter);
+apiRouter.use('/translate', translationRouter);
+apiRouter.use('/asr', asrRouter);
+apiRouter.use('/tts', ttsRouter);
+apiRouter.use('/whatsapp', whatsappRouter);
+apiRouter.use('/sms', smsRouter);
+apiRouter.use('/telegram', telegramRouter);
+apiRouter.use('/ivr', ivrRouter);
+apiRouter.use('/priority', priorityRouter);
+apiRouter.use('/verification', verificationRouter);
