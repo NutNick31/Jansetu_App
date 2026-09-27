@@ -70,6 +70,9 @@ export interface DistrictMetric {
   };
   citizenDemandCount: number;
   priorityIndex: number; // Calculated PI
+  censusPopulation?: number;
+  wikipediaSummary?: string;
+  wikipediaUrl?: string;
 }
 
 export interface GovernmentScheme {

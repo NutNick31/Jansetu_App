@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.production
+secrets/
+firebase-service-account.json
+*.log
+.git/
+.gitignore
+.vscode/
+tests/
+tests_v1/
+*.md

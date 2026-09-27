@@ -25,7 +25,7 @@ import { SUPPORTED_LANGUAGES } from '../data/mockData';
 import { bhashiniTranslateToEnglish, extractDataPointsFromInput, playBhashiniTTS } from '../services/bhashiniService';
 import { analyzeInfrastructurePhoto } from '../services/geminiService';
 import { apiPost } from '../services/apiClient';
-import { WhatsAppModal } from './WhatsAppModal';
+import { TelegramModal } from './TelegramModal';
 
 interface CitizenPortalProps {
   selectedLang: LanguageCode;
@@ -38,7 +38,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
   requests,
   onNewRequest
 }) => {
-  const [activeChannel, setActiveChannel] = useState<'whatsapp' | 'ivr' | 'sms' | 'webapp' | 'ussd'>('webapp');
+  const [activeChannel, setActiveChannel] = useState<'telegram' | 'ivr' | 'sms' | 'webapp' | 'ussd'>('webapp');
   
   // Conversational 3-Question State
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -59,14 +59,14 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
 
-  // Real WhatsApp QR Code Modal State
+  // Telegram bot deep-link modal state.
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
 
-  // WhatsApp Interactive Chat Simulator State
+  // Interactive chat simulator state.
   const [waMessages, setWaMessages] = useState<Array<{ sender: 'bot' | 'user'; text: string; time: string; image?: string }>>([
     {
       sender: 'bot',
-      text: 'Namaste! Welcome to JanSetu AI Official WhatsApp DPI Bot. Please select an infrastructure issue or type your grievance in any Indian language.',
+      text: 'Namaste! Welcome to JanSetu AI Official Telegram DPI Bot. Please select an infrastructure issue or type your grievance in any Indian language.',
       time: '21:05'
     }
   ]);
@@ -185,7 +185,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
     reader.readAsDataURL(file);
   };
 
-  // Handle Interactive WhatsApp Message Send
+  // Handle Interactive Telegram Message Send
   const handleSendWaMessage = async (customText?: string) => {
     const textToSend = customText || waInputText;
     if (!textToSend.trim()) return;
@@ -200,9 +200,9 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
       const { request } = await apiPost<{ request: CitizenRequest }>('/api/requests/ingest', {
         text: textToSend,
         language: selectedLang,
-        citizenName: 'WhatsApp User',
-        phone: '+91 98391 *****',
-        channel: 'whatsapp',
+        citizenName: 'Telegram User',
+        phone: 'tg:simulator',
+        channel: 'telegram',
       });
       const botResponse = {
         sender: 'bot' as const,
@@ -213,7 +213,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
       onNewRequest(request);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.warn('WhatsApp simulator ingest failed, falling back to local heuristic', err);
+      console.warn('Telegram simulator ingest failed, falling back to local heuristic', err);
       const extracted = extractDataPointsFromInput(textToSend);
       setWaMessages(prev => [...prev, {
         sender: 'bot',
@@ -314,13 +314,13 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
               <span>Web App</span>
             </button>
             <button
-              onClick={() => setActiveChannel('whatsapp')}
+              onClick={() => setActiveChannel('telegram')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeChannel === 'whatsapp' ? 'bg-emerald-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
+                activeChannel === 'telegram' ? 'bg-sky-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
               <MessageSquare className="w-3.5 h-3.5" />
-              <span>WhatsApp API Bot</span>
+              <span>Telegram Bot</span>
             </button>
             <button
               onClick={() => setActiveChannel('ivr')}
@@ -347,30 +347,30 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
       {/* Main Grid: Form Left, Real-Time Request Stream Right */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Form / WhatsApp Simulator Container (7 Cols) */}
+        {/* Form / Telegram Simulator Container (7 Cols) */}
         <div className="lg:col-span-7 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl space-y-6">
           
-          {/* INTERACTIVE WHATSAPP API BOT SIMULATOR */}
-          {activeChannel === 'whatsapp' ? (
+          {/* INTERACTIVE TELEGRAM BOT SIMULATOR */}
+          {activeChannel === 'telegram' ? (
             <div className="space-y-4">
-              <div className="bg-emerald-950/90 border border-emerald-500/40 p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-sky-950/90 border border-sky-500/40 p-4 rounded-xl flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-full bg-sky-500 text-slate-950 flex items-center justify-center font-bold">
                     <Bot className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="flex items-center space-x-1.5">
-                      <span className="text-sm font-bold text-white">JanSetu AI Official WhatsApp DPI Bot</span>
-                      <span className="bg-emerald-500 text-slate-950 text-[9px] px-1 rounded font-bold">VERIFIED</span>
+                      <span className="text-sm font-bold text-white">JanSetu AI Official Telegram DPI Bot</span>
+                      <span className="bg-sky-500 text-slate-950 text-[9px] px-1 rounded font-bold">VERIFIED</span>
                     </div>
-                    <span className="text-xs text-emerald-400">Online • Powered by Bhashini 22+ Languages</span>
+                    <span className="text-xs text-sky-400">@jansetu_ai_bot • Powered by Bhashini 22+ Languages</span>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setIsWaModalOpen(true)}
-                    className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1 transition-all shadow"
+                    className="bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center space-x-1 transition-all shadow"
                   >
                     <QrCode className="w-3.5 h-3.5" />
                     <span>Connect Real Phone</span>
@@ -426,7 +426,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
                 </button>
               </div>
 
-              {/* WhatsApp Message Input Bar */}
+              {/* Telegram Message Input Bar */}
               <div className="flex items-center space-x-2 pt-2">
                 <div className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 flex items-center space-x-2">
                   <Smile className="w-4 h-4 text-slate-500" />
@@ -435,14 +435,14 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
                     value={waInputText}
                     onChange={(e) => setWaInputText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendWaMessage()}
-                    placeholder="Type a WhatsApp message in Hindi, Tamil, Telugu, English..."
+                    placeholder="Type a Telegram message in Hindi, Tamil, Telugu, English..."
                     className="flex-1 bg-transparent text-xs text-white focus:outline-none"
                   />
                   <Paperclip className="w-4 h-4 text-slate-500 cursor-pointer" />
                 </div>
                 <button
                   onClick={() => handleSendWaMessage()}
-                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 p-2.5 rounded-xl transition-all font-bold"
+                  className="bg-sky-500 hover:bg-sky-400 text-slate-950 p-2.5 rounded-xl transition-all font-bold"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -458,7 +458,7 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
                   </div>
                   <h3 className="text-xl font-bold text-white">Request Successfully Submitted to JanSetu DPI!</h3>
                   <p className="text-slate-300 text-sm max-w-md mx-auto">
-                    Your demand report has been transcribed by Bhashini AI and indexed under H3 Spatial Cluster. Automatic WhatsApp notification sent.
+                    Your demand report has been transcribed by Bhashini AI and indexed under H3 Spatial Cluster. Automatic Telegram notification sent.
                   </p>
                   <button
                     onClick={resetForm}
@@ -755,8 +755,8 @@ export const CitizenPortal: React.FC<CitizenPortalProps> = ({
 
       </div>
 
-      {/* Real WhatsApp Modal */}
-      <WhatsAppModal
+      {/* Real Telegram Bot Deep-Link Modal */}
+      <TelegramModal
         isOpen={isWaModalOpen}
         onClose={() => setIsWaModalOpen(false)}
       />

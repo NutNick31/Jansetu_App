@@ -81,7 +81,7 @@ export const PolicymakerDashboard: React.FC<PolicymakerDashboardProps> = ({
   // AI-generated project recommendations, refreshed alongside the simulate call.
   const [aiRecs, setAiRecs] = useState<RecommendedProject[]>([]);
   const recDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [recsLoading, setRecsLoading] = useState<boolean>(true);
+  const [, setRecsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (recDebounceRef.current) clearTimeout(recDebounceRef.current);
